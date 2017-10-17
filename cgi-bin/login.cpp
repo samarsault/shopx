@@ -21,7 +21,18 @@ public:
 	string name, passwd, address, type;
 	User() 
 	{
-		db = database("shopx.db");
+		try
+		{
+		  database db("shopx.db");
+		  db<<
+		    "create file if not exists user("
+		    " name string not null,"
+		    " id long not null,"
+		    " password string not null,"
+		    " address string noy null,"
+		    " type string not null"
+		    ");";
+		} 
 	}
 	void createUser(long ID, string name, string password, string address, string type)
 	{
