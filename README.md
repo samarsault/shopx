@@ -11,10 +11,10 @@ The following databases exist:
    ID, Name, Address, Email, ID, Auth_Token(Password), Type(Buyer/Seller)
 
 2. Items
-    Name, Price, Description, Discount(FLOAT), IMAGE, SelleRID
+    Name, Price, Description, Discount(FLOAT), IMAGE, SellerID, Inventory
 
 3. Orders
-    UserID, ProductID
+    OrderID, UserID, ProductID
 
 ## C++ Dependencies
 

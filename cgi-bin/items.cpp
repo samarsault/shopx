@@ -12,16 +12,32 @@ using namespace std;
 using namespace sqlite;
 using namespace cgicc;
 
-class Items {
-	// all functions
-};
 
+// Name, Price, Description, Discount(FLOAT), IMAGE, SellerID, Inventory
+class Item {
+	database db;
+public:
+
+	// all functions
+	Item()
+	{
+		db = database("shopx.db");
+	}
+	// returns true if successful
+	bool addItem(long itemID, string name, int price, string description, string imageLink, long sellerID, int inventory, float discount)
+	{
+		
+	}
+	// reduce inventory by 1 or remove from db if inventory=0
+	void itemSold(long itemID) {
+
+	}
+
+}
 int main(int argc, char **argv)
 {
 	try {
 		Cgicc cgi;
-
-		database db("items.db");
 
 		// Write here
 		

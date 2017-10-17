@@ -12,8 +12,24 @@ using namespace std;
 using namespace sqlite;
 using namespace cgicc;
 
+string type[2] = { "Buyer", "Seller" };
 class User {
-	// all function
+private:
+	database db;
+public:
+	long ID;
+	string name, passwd, address, type;
+	User() 
+	{
+		db = database("shopx.db");
+	}
+	void createUser(long ID, string name, string password, string address, string type)
+	{
+		// code
+	}
+	User getUser(long ID) {
+		// TODO
+	}
 };
 
 int main(int argc, char **argv)
@@ -23,7 +39,6 @@ int main(int argc, char **argv)
 		cgicc::form_iterator name = cgi.getElement("user");
 		cgicc::form_iterator pass = cgi.getElement("pass");
 
-		database db("users.db");
 
 		// Write here
 		

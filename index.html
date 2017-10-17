@@ -17,11 +17,7 @@
 					<img src="img/logo.png" width="120" >
 				</a>
 				
-				<button class="button navbar-burger">
-					<span></span>
-					<span></span>
-					<span></span>
-				</button>
+				<button class="button navbar-burger"></button>
 			</div>
 			<div class="navbar-menu">
 				<div class="navbar-start" style="padding: 0.5em">
@@ -37,15 +33,11 @@
 		
 		<b-modal :active.sync="isLoginActive">
 			<section class="login-win">
-				<b-field label="Email"
-				type="is-danger"
-				message="This email is invalid">
-					<b-input type="email" maxlength="30" />
+				<b-field label="Email">
+					<b-input type="email" />
 				</b-field>
 		
-				<b-field label="Password"
-				type="is-warning"
-				:message="['Password is too short', 'Password must have at least 8 characters']">
+				<b-field label="Password">
 					<b-input type="password"></b-input>
 				</b-field>
 				<div v-if="register">
@@ -56,13 +48,16 @@
 					</b-select>
 				</b-field>
 				</div>
-				<div class="panel">
-					<button class="is-secondary button">Login</button>
-					<button class="is-secondary button">Register</button>
-				</div>
 			</section>
+				<div class="panel" align="right">
+					<button class="is-link button">Login</button>
+					<button class="is-link button" @click="register=true">Register</button>
+				</div>
 		</b-modal>
 </div>
+<footer>
+	<p>&copy; Shop<span style="color:rgb(21, 102, 192)">X</span> 2017</p>
+</footer>
 <script src="scripts/app.js"></script>
 </body>
 </html>

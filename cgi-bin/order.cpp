@@ -13,15 +13,42 @@ using namespace sqlite;
 using namespace cgicc;
 
 class Order {
+	database db;
+public:
+	long userID;
+	long productID;
+	long orderID;
+
 	// all functions
-};
+	Order()
+	{
+		db = database("shopx.db");
+	}
+	// returns true if successful
+	bool placeOrder(long userID, long productID) {
+
+	}
+	Order getOrder(long orderID) {
+
+	}
+	// get all orders placed by a particular user
+	// returns : array of orders
+	Order* getAllOrders(long userID) {
+
+	}
+	// get all orders of a product
+	// returns array of orders
+	Order* getProductOrders(long productID) {
+
+	}
+}
 
 int main(int argc, char **argv)
 {
 	try {
 		Cgicc cgi;
 
-		database db("orders.db");
+		database db("shopx.db");
 
 		// Write here
 		
