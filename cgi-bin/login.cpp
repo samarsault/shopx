@@ -26,11 +26,11 @@ public:
 		  database db("shopx.db");
 		  db<<
 		    "create file if not exists user("
-		    " name string not null,"
+		    " name text not null,"
 		    " id long not null,"
-		    " password string not null,"
-		    " address string noy null,"
-		    " type string not null"
+		    " password text not null,"
+		    " address text noy null,"
+		    " type text not null"
 		    ");";
 		} 
 	}

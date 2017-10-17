@@ -25,11 +25,11 @@ public:
 		{  database db("shopx.db");
 		   db<<
 		    "create table if not exists user ("
-			" name char* not null,"
+			" name text not null,"
 			" price integer not null,"
-			" description string,"
+			" description text,"
 			" discount float,"
-			" imageLink string,"
+			" imageLink text,"
 			" sellerid long,"
 			" inventory integer"
 			");";
