@@ -39,7 +39,7 @@ public:
 	// returns true if successful
 	bool addItem(long itemID, string name, int price, string description, string imageLink, long sellerID, int inventory, float discount)
 	{
-		db<<"insert into user (itemID,name,price,description,imageLink,sellerID,inventory,discount) values(?,?,?,?,?,?,?,?);"
+		db<<"insert into items (itemID,name,price,description,imageLink,sellerID,inventory,discount) values(?,?,?,?,?,?,?,?);"
 		  <<itemID
 		  <<name
 		  <<price

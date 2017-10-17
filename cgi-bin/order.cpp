@@ -38,7 +38,7 @@ public:
 	// returns true if successful
 	bool placeOrder(long userID, long productID) 
 	{
-      db<<"insert into user (userID,produtID) values(?,?);"
+      db<<"insert into order (userID,produtID) values(?,?);"
         <<userID
 		<<productID;
 		return true;      
