@@ -21,7 +21,20 @@ public:
 	// all functions
 	Item()
 	{
-		db = database("shopx.db");
+		try
+		{  database db("shopx.db");
+		   db<<
+		    "create table if not exists user ("
+			" name char* not null,"
+			" price integer not null,"
+			" description string,"
+			" discount float,"
+			" imageLink string,"
+			" sellerid long,"
+			" inventory integer"
+			");";
+		}
+		
 	}
 	// returns true if successful
 	bool addItem(long itemID, string name, int price, string description, string imageLink, long sellerID, int inventory, float discount)
