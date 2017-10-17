@@ -36,8 +36,13 @@ public:
 		
 	}
 	// returns true if successful
-	bool placeOrder(long userID, long productID) {
-
+	bool placeOrder(long userID, long productID) 
+	{
+      db<<"insert into user (userID,produtID) values(?,?);"
+        <<userID
+		<<productID;
+		return true;      
+      
 	}
 	Order getOrder(long orderID) {
 
