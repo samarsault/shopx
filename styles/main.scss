@@ -1,0 +1,20 @@
+@import "sass/utilities/initial-variables";
+
+$primary: rgb(38, 46, 66);
+$secondary: $cyan;
+
+@import 'bulma';
+@import 'buefy/buefy';
+@import 'fa'; // font awesome
+
+nav.navbar {
+	padding: 1em 5em;
+}
+
+.login-win {
+	background-color: #fff;
+	padding: 1em 2em;
+}
+.panel {
+	background-color: #eee;
+}

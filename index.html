@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width" />
+	<link rel="stylesheet" href="styles/main.css">
+	<title>ShopX | Where retailers meet shoppers</title>
+	
+	<script src="scripts/vue.js"></script>
+	<script src="scripts/buefy.min.js"></script>
+</head>
+<body>
+	<div id="app">
+		<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+			<div class="navbar-brand">
+				<a class="navbar-item" href="">
+					<img src="img/logo.png" width="120" >
+				</a>
+				
+				<button class="button navbar-burger">
+					<span></span>
+					<span></span>
+					<span></span>
+				</button>
+			</div>
+			<div class="navbar-menu">
+				<div class="navbar-start" style="padding: 0.5em">
+					<input class="input" style="width:30em;margin-left:10em;height:100%" type="text" placeholder="Search...">
+				</div>
+				<div class="navbar-end">
+					<a class="navbar-item">Home</a>
+					<a class="navbar-item">Trending</a>
+					<a class="navbar-item" @click="isLoginActive=true">Login</a>
+				</div>
+			</div>
+		</nav>
+		
+		<b-modal :active.sync="isLoginActive">
+			<section class="login-win">
+				<b-field label="Email"
+				type="is-danger"
+				message="This email is invalid">
+					<b-input type="email" maxlength="30" />
+				</b-field>
+		
+				<b-field label="Password"
+				type="is-warning"
+				:message="['Password is too short', 'Password must have at least 8 characters']">
+					<b-input type="password"></b-input>
+				</b-field>
+				<div v-if="register">
+				<b-field label="I came to">
+					<b-select placeholder="Shop/Sell">
+						<option value="1">Shop</option>
+						<option value="2">Sell</option>
+					</b-select>
+				</b-field>
+				</div>
+				<div class="panel">
+					<button class="is-secondary button">Login</button>
+					<button class="is-secondary button">Register</button>
+				</div>
+			</section>
+		</b-modal>
+</div>
+<script src="scripts/app.js"></script>
+</body>
+</html>
