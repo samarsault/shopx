@@ -37,6 +37,12 @@ public:
 	void createUser(long ID, string name, string password, string address, string type)
 	{
 		// code
+		db<< "insert into user (id,name,passord,address,type) values(?,?,?,?,?); "
+	      <<ID
+		  <<Name
+		  <<password
+		  <<address
+		  <<type; 	
 	}
 	User getUser(long ID) {
 		// TODO
