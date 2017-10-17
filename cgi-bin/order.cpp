@@ -29,7 +29,7 @@ public:
 			  " create table if not exists user ("
 			  " userid long not null,"
 			  " productid long not null,"
-			  " order id long not null"
+			  " orderid long not null"
 			  ");";
 			  
 		}
