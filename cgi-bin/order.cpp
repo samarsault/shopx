@@ -22,7 +22,18 @@ public:
 	// all functions
 	Order()
 	{
-		db = database("shopx.db");
+		try
+		{
+			db = database("shopx.db");
+			db<<
+			  " create table if not exists user ("
+			  " userid long not null,"
+			  " productid long not null,"
+			  " order id long not null"
+			  ");";
+			  
+		}
+		
 	}
 	// returns true if successful
 	bool placeOrder(long userID, long productID) {
