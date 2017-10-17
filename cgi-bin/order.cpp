@@ -27,9 +27,9 @@ public:
 			db = database("shopx.db");
 			db<<
 			  " create table if not exists user ("
-			  " userid long not null,"
-			  " productid long not null,"
-			  " orderid long not null"
+			  " userid biginteger not null,"
+			  " productid biginteger not null,"
+			  " orderid biginteger not null"
 			  ");";
 			  
 		}

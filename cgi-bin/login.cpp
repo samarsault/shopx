@@ -27,9 +27,9 @@ public:
 		  db<<
 		    "create file if not exists user("
 		    " name text not null,"
-		    " id long not null,"
+		    " id biginteger not null,"
 		    " password text not null,"
-		    " address text noy null,"
+		    " address text not null,"
 		    " type text not null"
 		    ");";
 		} 
@@ -39,7 +39,7 @@ public:
 		// code
 		db<< "insert into user (id,name,passord,address,type) values(?,?,?,?,?); "
 	      <<ID
-		  <<Name
+		  <<name
 		  <<password
 		  <<address
 		  <<type; 	

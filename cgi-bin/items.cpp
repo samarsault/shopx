@@ -30,7 +30,7 @@ public:
 			" description text,"
 			" discount float,"
 			" imageLink text,"
-			" sellerid long,"
+			" sellerid biginteger,"
 			" inventory integer"
 			");";
 		}
