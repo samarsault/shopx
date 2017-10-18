@@ -46,7 +46,7 @@ public:
 	}
 	User getUser(long ID) {
 		// TODO
-		db<<"select* from user where id=ID;"
+		db<<"select* from user where" id=ID;
 	}
 };
 
