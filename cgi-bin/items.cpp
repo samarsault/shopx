@@ -52,7 +52,9 @@ public:
 	}
 	// reduce inventory by 1 or remove from db if inventory=0
 	void itemSold(long itemID) {
-
+		db<<"delete from item where inventory=0;"
+		inventory-=1;
+        
 	}
 
 }
