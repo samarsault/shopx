@@ -54,7 +54,6 @@ public:
 	void itemSold(long itemID) {
 		db<<"delete from item where inventory=0;"
 		db<<"update item set inventory-=1 where inventory!=1;"
-        
 	}
 
 }

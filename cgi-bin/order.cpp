@@ -12,53 +12,6 @@ using namespace std;
 using namespace sqlite;
 using namespace cgicc;
 
-class Order {
-	database db;
-public:
-	long userID;
-	long productID;
-	long orderID;
-
-	// all functions
-	Order()
-	{
-		try
-		{
-			db = database("shopx.db");
-			db<<
-			  " create table if not exists user ("
-			  " userid biginteger not null,"
-			  " productid biginteger not null,"
-			  " orderid biginteger not null"
-			  ");";
-			  
-		}
-		
-	}
-	// returns true if successful
-	bool placeOrder(long userID, long productID) 
-	{
-      db<<"insert into order (userID,produtID) values(?,?);"
-        <<userID
-		<<productID;
-		return true;      
-      
-	}
-	Order getOrder(long orderID) {
-
-	}
-	// get all orders placed by a particular user
-	// returns : array of orders
-	Order* getAllOrders(long userID) {
-
-	}
-	// get all orders of a product
-	// returns array of orders
-	Order* getProductOrders(long productID) {
-
-	}
-}
-
 int main(int argc, char **argv)
 {
 	try {

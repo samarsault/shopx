@@ -1,67 +1,56 @@
 /*
- * Authenticate a User / Create one
- */
-  
+* Authenticate a User / Create one
+*/
+
 #include <iostream>
 #include "cgicc/Cgicc.h"
 #include "cgicc/HTTPHTMLHeader.h"
 #include "cgicc/HTMLClasses.h"
-#include <sqlite_modern_cpp.h>
+#include "json.hpp"
+#include "data.hpp"
 
 using namespace std;
-using namespace sqlite;
 using namespace cgicc;
-
-string type[2] = { "Buyer", "Seller" };
-class User {
-private:
-	database db;
-public:
-	long ID;
-	string name, passwd, address, type;
-	User() 
-	{
-		try
-		{
-		  database db("shopx.db");
-		  db<<
-		    "create file if not exists user("
-		    " name text not null,"
-		    " id biginteger not null,"
-		    " password text not null,"
-		    " address text not null,"
-		    " type text not null"
-		    ");";
-		} 
-	}
-	void createUser(long ID, string name, string password, string address, string type)
-	{
-		// code
-		db<< "insert into user (id,name,passord,address,type) values(?,?,?,?,?); "
-	      <<ID
-		  <<name
-		  <<password
-		  <<address
-		  <<type; 	
-	}
-	User getUser(long ID) {
-		// TODO
-		db<<"select* from user where" id=ID;
-	}
-};
+using json = nlohmann::json;
 
 int main(int argc, char **argv)
 {
+	json resp;
+	resp["success"] = false;
 	try {
+		UserDB users;
 		Cgicc cgi;
-		cgicc::form_iterator name = cgi.getElement("user");
-		cgicc::form_iterator pass = cgi.getElement("pass");
-
-
-		// Write here
+		cout << HTTPContentHeader("application/json"); 
+		CgiEnvironment env = cgi.getEnvironment();
+		cout << env.getPostData();
+		json j = json::parse(env.getPostData());
 		
+		// not enough arguments
+		auto reg = j.find("register");
+		auto emailPtr = j.find("email");
+		auto passPtr = j.find("pass");
+		
+		if (emailPtr== j.end() || passPtr == j.end() || reg == j.end())
+			return 1;
+		
+		string email = *emailPtr, pass =*passPtr;
+		bool isRegister = j["register"];
+		if (!isRegister) {
+			// authenticate user
+			if (users.auth(email, pass)) 
+				resp["success"] = true;
+		} else {
+			auto type = j.find("type");
+			if (type != j.end()) {
+				int t = j["type"];
+				if(users.createUser(email, pass, t))
+					resp["success"] = true;
+			}
+		}
 	}
 	catch(exception& e) {
 		// handle any errors - omitted for brevity
+		cout << e.what() << endl;
 	}
+	cout << resp.dump();
 }

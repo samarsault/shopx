@@ -50,7 +50,8 @@ gulp.task('img-min', function () {
 //
 gulp.task('serve', function () {
 	browserSync.init({
-		server: './'
+		proxy: 'localhost:8000',
+		port: 8080
 	});
 
 	gulp.watch(Files.sass, [ 'sass' ])

@@ -19,4 +19,7 @@ The following databases exist:
 ## C++ Dependencies
 
 CGICC: http://ftp.gnu.org/gnu/cgicc/
+
 SQLITE C++ Parser: https://github.com/aminroosta/sqlite_modern_cpp
+
+JSON: https://github.com/nlohmann/json

@@ -32,32 +32,42 @@
 		</nav>
 		
 		<b-modal :active.sync="isLoginActive">
+			<auth></auth>
+		</b-modal>
+	</div>
+	<footer>
+		<p>&copy; Shop<span style="color:rgb(21, 102, 192)">X</span> 2017</p>
+	</footer>
+	
+	<script type="text/x-template" id="auth-templ">
+		<div>
 			<section class="login-win">
 				<b-field label="Email">
-					<b-input type="email" />
+					<b-input v-model="email" type="email" />
 				</b-field>
-		
+				
 				<b-field label="Password">
-					<b-input type="password"></b-input>
+					<b-input password-reveal v-model="pass" type="password"></b-input>
 				</b-field>
+				<p v-if="!register" align="right">New User? <a href="#" @click="register=true">Sign Up.</a></p>
 				<div v-if="register">
-				<b-field label="I came to">
-					<b-select placeholder="Shop/Sell">
-						<option value="1">Shop</option>
-						<option value="2">Sell</option>
-					</b-select>
-				</b-field>
+					<b-field label="I came to">
+						<b-select placeholder="Shop/Sell" v-model="typeOption">
+							<option value="1">Shop</option>
+							<option value="2">Sell</option>
+						</b-select>
+					</b-field>
 				</div>
 			</section>
-				<div class="panel" align="right">
-					<button class="is-link button">Login</button>
-					<button class="is-link button" @click="register=true">Register</button>
-				</div>
-		</b-modal>
-</div>
-<footer>
-	<p>&copy; Shop<span style="color:rgb(21, 102, 192)">X</span> 2017</p>
-</footer>
-<script src="scripts/app.js"></script>
+			<div class="panel" align="right">
+				<button class="is-link button" v-if="!register" @click="login">Login</button>
+				<button class="is-link button" v-if="register" @click="login">Register</button>
+				<button class="is-link button" @click="closeModal">Cancel</button>
+			</div>
+		</div>
+	</script>
+	
+	<script src="scripts/axios.min.js"></script>
+	<script src="scripts/app.js"></script>
 </body>
 </html>
