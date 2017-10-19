@@ -1,1 +1,1 @@
- web: python -m CGIHTTPServer $PORT
+ web: python -m http.server --cgi $PORT

@@ -8,7 +8,7 @@ import uuid
 UPLOAD_DIR = './upload'
 
 def save_uploaded_file():
-	print 'Content-Type: application/json; charset=UTF-8'
+	print(  'Content-Type: application/json; charset=UTF-8' )
 	print
 	resp = { }
 	resp['success'] = False
@@ -40,4 +40,4 @@ def save_uploaded_file():
 	return resp
 
 cgitb.enable()
-print json.dumps(save_uploaded_file())
+print(json.dumps(save_uploaded_file()))
