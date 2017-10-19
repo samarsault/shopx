@@ -1,9 +1,12 @@
 /*
-* Client Side
+*  SPA UI
 */ 
 
 Vue.use(Buefy.default);
 
+//
+// Routes
+//
 var dashboard = {
 	template: '#dashboard-templ',
 	data: function (){
@@ -23,7 +26,7 @@ var dashboard = {
 	},
 	mounted: function() {
 		if (this.$parent.user != null)
-			this.loadItems();
+		this.loadItems();
 	},
 	methods: {
 		loadItems: function() {
@@ -95,7 +98,9 @@ var shop = {
 	data: function() {
 		return {
 			items: [],
-			loading: false
+			loading: false,
+			itVisible: false,
+			selected: -1
 		};
 	},
 	mounted: function() {
@@ -111,31 +116,97 @@ var shop = {
 					me.items = resp.data.items;
 				}
 			}).catch(console.error);
+		},
+		moreInfo: function(e) {
+			this.selected = parseInt(e.currentTarget.getAttribute('id'));
+			this.itVisible = true;
 		}
+	}
+};
+
+var itemInfo = {
+	template: '#item-info-templ',
+	props: ['id'],
+	data: function() {
+		return {
+			item: {}
+		}
+	},
+	beforeMount: function() {
+		var me = this;
+		var id = parseInt(this.$route.params.id);
+		axios.post('/cgi-bin/items', {
+			method: 'get',
+			item: {
+				_id: id
+			}
+		}).then(function(resp){
+			if (resp.data.success)
+			me.item = resp.data.item;
+			else
+			console.log('Error!');
+		}).catch(console.error);
 	}
 };
 
 const router = new VueRouter({
 	routes: [
+		{ path: '/', component: { template: '#home-page'} },
 		{ path: '/dashboard', component: dashboard },
-		{ path: '/shop', component: shop }
+		{ path: '/shop', component: shop },
+		{ path: '/items/:id', component: itemInfo }
 	]
 });
 
-var app = new Vue({
-	el: '#app',
-	router: router,
-	beforeMount: function() {
-		var user = localStorage.getItem('user');
-		if (user != null) {
-			this.user = JSON.parse(user);
-			this.loggedIn = true;
+//
+// Components
+//
+
+// TODO: Implement Server Side Search
+Vue.component('item-search', {
+	template: '#item-search-templ',
+	data: function() {
+		return {
+			isFetching: false,
+			oData: [],
+			data: [],
+			name: '',
+			selected: null,
+			nameArr: [],
+			fuse: null
 		}
 	},
-	data: {
-		isLoginActive: false,
-		loggedIn: false,
-		user: null
+	beforeMount: function() {
+		var me = this;
+		axios.post('/cgi-bin/items', {
+			method: 'all'
+		}).then(function(resp) {
+			if (resp.data.success) {
+				me.oData = resp.data.items;
+				me.isFetching = false;
+				me.fuse = new Fuse(resp.data.items, {
+					shouldSort: true,
+					threshold: 0.6,
+					location: 0,
+					distance: 100,
+					maxPatternLength: 32,
+					minMatchCharLength: 1,
+					keys: [
+						"name",
+						"description"
+					]
+				});;
+			}
+		}).catch(console.error);
+	},
+	methods: {
+		getData: function() {
+			this.data = [];
+			var me = this;
+			if (me.oData.length >= 0) {
+				this.data = this.fuse.search(this.name);
+			}
+		}
 	}
 });
 
@@ -161,9 +232,9 @@ Vue.component('auth', {
 				})
 				.then(function (response) {
 					if (response.data.success) {
-						app.user = response.data.user;
-						app.loggedIn = true;
-						localStorage.setItem("user", JSON.stringify(app.user));
+						me.$parent.user = response.data.user;
+						me.$parent.loggedIn = true;
+						localStorage.setItem("user", JSON.stringify(me.$parent.user));
 						me.closeModal();
 					}
 				})
@@ -177,3 +248,30 @@ Vue.component('auth', {
 		}
 	}
 });
+
+var app = new Vue({
+	el: '#app',
+	router: router,
+	beforeMount: function() {
+		var user = localStorage.getItem('user');
+		if (user != null) {
+			this.user = JSON.parse(user);
+			this.loggedIn = true;
+		}
+	},
+	data: {
+		isLoginActive: false,
+		loggedIn: false,
+		user: null
+	},
+	methods: {
+		logout: function () {
+			localStorage.removeItem('user');
+			this.user = null;
+			this.loggedIn = false;
+			// navigate to home page
+			this.$router.push('/');
+		}
+	}
+});
+

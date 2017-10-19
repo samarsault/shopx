@@ -7,8 +7,10 @@ $secondary: $cyan;
 @import 'buefy/buefy';
 @import 'fonts'; // font awesome
 
+$navExtra: 5em;
+
 nav.navbar {
-	padding: 1em 5em;
+	padding: 1em $navExtra;
 }
 
 .login-win {
@@ -35,10 +37,11 @@ footer {
 }
 
 .item-img {
-	height: 300px;
-	width: 300px;
+	height: 250px;
+	width: 250px;
 	background-size: cover;
-	background-position: center
+	background-position: center;
+	margin: 1em 0;
 }
 
 .shop-item {
@@ -48,8 +51,34 @@ footer {
 		border-top: 1px solid #eee;
 		padding: 1em 0;
 	}
-	button {
-		width: 100%;
+	.button {
+		width: 100% !important;
 		border-radius:0;
 	}
 }
+
+#itemModal .modal-content {
+	width: 60%;
+}
+
+.hero {margin: 0 4em;}
+.hero-home {
+	background-color: lighten($primary, 1%);
+	min-height: 400px;
+	color: #fff;
+	.columns {
+		margin:0 $navExtra;
+	}
+	.heading {
+		font-weight: 100;
+		font-size: 2.5rem;
+		-webkit-font-smoothing: antialised;
+		text-transform: capitalize;
+	}
+}
+.fade-enter-active, .fade-leave-active {
+	transition: opacity .5s
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+	opacity: 0
+  }

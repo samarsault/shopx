@@ -22,14 +22,14 @@
 			</div>
 			<div class="navbar-menu">
 				<div class="navbar-start" style="padding: 0.5em">
-					<input class="input" style="width:30em;margin-left:10em;height:100%" type="text" placeholder="Search...">
+					<item-search></item-search>
 				</div>
 				<div class="navbar-end">
-					<a class="navbar-item">Home</a>
+					<router-link class="navbar-item" to="/">Home</router-link>
 					<router-link class="navbar-item" to="/shop">Shop</router-link>
 					<router-link v-if="loggedIn" class="navbar-item" to="/dashboard">Dashboard</router-link>
 					<a v-if="!loggedIn" class="navbar-item" @click="isLoginActive=true">Login</a>
-				</div>
+					<a v-if="loggedIn" class="navbar-item" @click="logout">Logout</a>
 			</div>
 		</nav>
 		
@@ -72,6 +72,7 @@
 	</script>
 	
 	<script type="text/x-template" id="dashboard-templ">
+		<transition name="fade">
 		<div class="container">
 			<!-- Add Item Modal -->
 			<b-modal :active.sync="addItemActive" ref="itemsModal">
@@ -159,37 +160,97 @@
 		
 		<b-tab-item label="Account" icon="account_circle"></b-tab-item>
 	</b-tabs>
+</transition>
 </div>
 </script>
 
 <script type="text/x-template" id="shop-templ">
-	<section class="hero" style="margin: 0 4em">
-		<div class="hero-body columns is-multiline">
-			<div align="center" class="column is-one-third" v-for="item in items">
-				<div class="card shop-item">
-					<div class="item-img"  v-bind:style='{ backgroundImage: "url(" + item.imageLink + ")", }'></div>
-					<p style="font-weight:300">{{ item.name }}</p>
-					<p style="color: #262e42;font-weight: bold">Rs. {{ item.price }}</p>
-					<div class="columns is-gapless">
-						<div class="column">
-							<button class="button field is-warning">	
-								<b-icon icon="add"></b-icon>
-								<span>Cart</span>
-							</button>
-						</div>
-						<div class="column">
-							<button class="button field is-link">	
-								<b-icon icon="expand_more"></b-icon>
-								<span>More</span>
-							</button>
+	<section style="background-color:#f6f6f6;">
+		<b-modal id="itemModal" :active.sync="itVisible">
+			<item-info :item="items[selected]"></item-info>
+		</b-modal>
+		<section class="hero" style="">
+			<div class="hero-body columns is-multiline">
+				<div align="center" class="column is-one-third" v-for="(item,index) in items">
+					<div class="card shop-item">
+						<div class="item-img"  v-bind:style='{ backgroundImage: "url(" + item.imageLink + ")", }'></div>
+						<p style="font-weight:300">{{ item.name }}</p>
+						<p style="color: #262e42;font-weight: bold">Rs. {{ item.price }}</p>
+						<div class="columns is-gapless">
+							<div class="column">
+								<button class="button field is-warning">	
+									<b-icon icon="add"></b-icon>
+									<span>Cart</span>
+								</button>
+							</div>
+							<div class="column">
+								<router-link :to="'/items/' + item._id" class="button field is-link">	
+									<b-icon icon="expand_more"></b-icon>
+									<span>More</span>
+								</router-link>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</section>
+		</section></section>
+	</script>
+	
+	<script type="text/x-template" id="item-info-templ">
+		<transition name="fade">
+		<section class="hero">
+			<div class="hero-body">
+				<div class="columns is-gapless">
+					<div class="column is-one-quarter">
+						<div class="item-img"  v-bind:style='{ backgroundImage: "url(" + item.imageLink + ")", }'></div>
+					</div>
+					<div class="column">
+						
+						<h1 class="title">{{ item.name }}</h1>
+						<p>{{ item.description }}</p>
+					</div>
+				</div>
+			</div>
+		</section>
+	</transition>
+	</script>
+	
+	<script type="text/x-template" id="item-search-templ">
+		<div style="width:30em;margin-left:10em;height:100%">
+			<b-autocomplete
+			v-model="name"
+			:data="data"
+			icon="search"
+			placeholder="Search"
+			field="title"
+			:loading="isFetching"
+			@input="getData"
+			@select="option => selected = option">
+			
+			<template scope="props">
+					<img style="float:left"width="25" :src="props.option.imageLink">
+					<p style="margin-left:3em">{{ props.option.name }} </p>
+			</template>
+		</b-autocomplete>
+	</div>
 </script>
 
+<script type="text/x-template" id="home-page">
+	<div>
+		<section class="hero-home">
+			<div class="columns" >
+				<div class="column is-two-fifths" style="padding:3em ">
+					<h1 class="heading">Welcome to the intersection of shoppers and buyers alike.</h1>
+				</div>
+			</div>
+		</section>
+		<div style="padding:1em 5em">
+			<h1 class="title">Trending</h1>
+		</div>
+	</div>
+</script>
+
+<script src="scripts/fuse.min.js"></script>	
 <script src="scripts/axios.min.js"></script>
 <script src="scripts/app.js"></script>
 </body>

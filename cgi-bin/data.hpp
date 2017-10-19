@@ -288,7 +288,8 @@ public:
 	vector<Item> search(string query) 
 	{
 		vector<Item> V;
-		db << "select (_id,seller_id,name,description,imageLink,category,price,inventory,discount) from items where name like '%?%'" << query
+		db << "SELECT _id,seller_id,name,description,imageLink,category,price,inventory,discount FROM items WHERE name like %?%;" 
+		<< query
 		>> [&](	long _id, 
 			long seller_id,
 			string name,
@@ -307,6 +308,7 @@ public:
 				i.seller_id = seller_id;
 				i.price = price;
 				i.inventory = inventory;
+				i.discount = discount;
 				V.push_back(i);
 			};
 		return V;
