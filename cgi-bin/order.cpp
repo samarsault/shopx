@@ -1,28 +1,42 @@
 /*
- * Authenticate a User / Create one
- */
-  
+* Place and Manage Orders
+* Method: POST JSON Data
+* Parameters:
+*		action: add, remove, update
+*
+* Response Params:
+*	success: (bool)
+*	error: (error message if any)
+*	user: (user object)
+*/
+
 #include <iostream>
 #include "cgicc/Cgicc.h"
 #include "cgicc/HTTPHTMLHeader.h"
 #include "cgicc/HTMLClasses.h"
-#include <sqlite_modern_cpp.h>
+#include "json.hpp"
+#include "data.hpp"
 
 using namespace std;
-using namespace sqlite;
 using namespace cgicc;
+using json = nlohmann::json;
 
 int main(int argc, char **argv)
 {
+	cout << HTTPContentHeader("application/json"); 
+	json resp;
+	resp["success"] = false;
 	try {
+		ItemsDB users;
 		Cgicc cgi;
-
-		database db("shopx.db");
-
-		// Write here
+		CgiEnvironment env = cgi.getEnvironment();
+		json j = json::parse(env.getPostData());
 		
 	}
 	catch(exception& e) {
-		// handle any errors - omitted for brevity
+		resp["error"] = e.what();
 	}
+	cout << resp.dump();
 }
+
+

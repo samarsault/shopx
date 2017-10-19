@@ -5,7 +5,7 @@ $secondary: $cyan;
 
 @import 'bulma';
 @import 'buefy/buefy';
-@import 'fa'; // font awesome
+@import 'fonts'; // font awesome
 
 nav.navbar {
 	padding: 1em 5em;
@@ -28,4 +28,28 @@ footer {
 	padding: 1em 2em;
 	font-size: 120%;
 	text-align: center;
+}
+
+.container {
+	padding: 2em 3em;
+}
+
+.item-img {
+	height: 300px;
+	width: 300px;
+	background-size: cover;
+	background-position: center
+}
+
+.shop-item {
+	overflow: hidden;
+	p {
+		font-size: 1.1em;
+		border-top: 1px solid #eee;
+		padding: 1em 0;
+	}
+	button {
+		width: 100%;
+		border-radius:0;
+	}
 }

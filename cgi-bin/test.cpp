@@ -1,18 +1,14 @@
 #include <iostream>
-#include "json.hpp"
+#include "data.hpp"
 
-using json = nlohmann::json;
+using namespace std;
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    json j = json::parse("{\"email\":\"sadfdf\",\"pass\":\"asfd\"}");
-    auto j2 = R"(
-        {
-          "happy": true,
-          "name": "samar",
-          "pi": 3.141
-        }
-      )"_json;
-      std::string s = j2["name"];
-    std::cout << s << std::endl;
+	ItemsDB items;
+	// vector<Item> v = db.userItems(1);
+	// for (int i = 0;i < v.size();i++)
+	// 	cout << v[i].name << endl;
+	vector<Item> v = items.userItems(1);
+	cout << v[0].name;
 }

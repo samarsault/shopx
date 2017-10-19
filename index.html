@@ -7,6 +7,7 @@
 	<title>ShopX | Where retailers meet shoppers</title>
 	
 	<script src="scripts/vue.js"></script>
+	<script src="scripts/vue-router.js"></script>
 	<script src="scripts/buefy.min.js"></script>
 </head>
 <body>
@@ -25,8 +26,9 @@
 				</div>
 				<div class="navbar-end">
 					<a class="navbar-item">Home</a>
-					<a class="navbar-item">Trending</a>
-					<a class="navbar-item" @click="isLoginActive=true">Login</a>
+					<router-link class="navbar-item" to="/shop">Shop</router-link>
+					<router-link v-if="loggedIn" class="navbar-item" to="/dashboard">Dashboard</router-link>
+					<a v-if="!loggedIn" class="navbar-item" @click="isLoginActive=true">Login</a>
 				</div>
 			</div>
 		</nav>
@@ -34,6 +36,8 @@
 		<b-modal :active.sync="isLoginActive">
 			<auth></auth>
 		</b-modal>
+		
+		<router-view></router-view>
 	</div>
 	<footer>
 		<p>&copy; Shop<span style="color:rgb(21, 102, 192)">X</span> 2017</p>
@@ -43,7 +47,7 @@
 		<div>
 			<section class="login-win">
 				<b-field label="Email">
-					<b-input v-model="email" type="email" />
+					<b-input ref="emailField" v-model="email" type="email" />
 				</b-field>
 				
 				<b-field label="Password">
@@ -67,7 +71,126 @@
 		</div>
 	</script>
 	
-	<script src="scripts/axios.min.js"></script>
-	<script src="scripts/app.js"></script>
+	<script type="text/x-template" id="dashboard-templ">
+		<div class="container">
+			<!-- Add Item Modal -->
+			<b-modal :active.sync="addItemActive" ref="itemsModal">
+				<section class="login-win">
+					<b-field label="Name">
+						<b-input v-model="name"></b-input>
+					</b-field>
+					
+					<b-field label="Description">
+						<b-input type="textarea"
+						minlength="100"
+						maxlength="1000"
+						v-model="desc"
+						placeholder="Maxlength automatically counts characters">
+					</b-input>
+				</b-field>
+				<div class="columns">
+					<div class="column">
+						<b-field label="Price (Rs.)" >
+							<b-input v-model="price" type="number" placeholder="At least Rs. 100" min="100" />
+						</b-field>
+					</div>
+					<div class="column">
+						<b-field label="Inventory" >
+							<b-input v-model="inventory" type="number" min="1" />
+						</b-field>
+					</div>
+				</div>
+				<div class="columns">
+					<div class="column">
+						<b-field label="Category">
+							<b-select placeholder="Select a Category" v-model="catValue" expanded>
+								<option
+								v-for="category in categories"
+								:value="category"
+								:key="category">
+								{{ category }}
+							</option>
+						</b-select>
+					</b-field>
+				</div>
+				<div class="column">
+					<b-field label="Image">
+						<form name="imgupload" method="POST" enctype="multipart/form-data">
+							<input name="file" type="file" accept="image/*">
+						</form>
+					</b-field>
+				</div>
+			</div>
+		</section>
+		<div class="panel" align="right">
+			<button class="is-link button"  @click="addItem">Add</button>
+			<button class="is-link button" @click="closeModal">Cancel</button>
+		</div>
+	</b-modal>
+	
+	<h1 class="title">Dashboard</h1>
+	<b-tabs type="is-toggle" expanded>
+		<b-tab-item label="Cart" icon="shopping_cart">
+			<b-table :data="cart" :loading="loading">
+				<b-table-column field="vote_average" label="Vote Average" numeric sortable>
+				</b-table-column>
+			</b-table>
+		</b-tab-item>
+		<b-tab-item label="My Items" icon="business" @click="loadItems">
+			<div align="right" style="margin:1em">
+				<button class="button field is-warning" @click="addItemActive=true">
+					<b-icon icon="add"></b-icon>
+					<span>Add Item</span>
+				</button>
+				<button class="button field is-danger">
+					<b-icon icon="delete"></b-icon>
+					<span>Delete Items</span>
+				</button>
+			</div>
+			<b-table :data="myItems" striped>
+				<template scope="props">
+					<b-table-column label="ID">{{ props.row._id }} </b-table-column>
+					<b-table-column label="Name">{{ props.row.name }}</b-table-column>
+					<b-table-column label="Price">{{ props.row.price }}</b-table-column>
+					<b-table-column label="Inventory">{{ props.row.inventory }}</b-table-column>
+				</template>
+			</b-table>
+		</b-tab-item>
+		
+		<b-tab-item label="Account" icon="account_circle"></b-tab-item>
+	</b-tabs>
+</div>
+</script>
+
+<script type="text/x-template" id="shop-templ">
+	<section class="hero" style="margin: 0 4em">
+		<div class="hero-body columns is-multiline">
+			<div align="center" class="column is-one-third" v-for="item in items">
+				<div class="card shop-item">
+					<div class="item-img"  v-bind:style='{ backgroundImage: "url(" + item.imageLink + ")", }'></div>
+					<p style="font-weight:300">{{ item.name }}</p>
+					<p style="color: #262e42;font-weight: bold">Rs. {{ item.price }}</p>
+					<div class="columns is-gapless">
+						<div class="column">
+							<button class="button field is-warning">	
+								<b-icon icon="add"></b-icon>
+								<span>Cart</span>
+							</button>
+						</div>
+						<div class="column">
+							<button class="button field is-link">	
+								<b-icon icon="expand_more"></b-icon>
+								<span>More</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</script>
+
+<script src="scripts/axios.min.js"></script>
+<script src="scripts/app.js"></script>
 </body>
 </html>

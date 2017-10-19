@@ -12,8 +12,10 @@
 using namespace std;
 using namespace sqlite;
 
+typedef pair<int, int> pii;
+
 // database object
-database db("../data/shopx.db");
+database db("shopx.db");
 
 enum USER_TYPE {
 	BUYER,
@@ -184,10 +186,9 @@ public:
 		" category text,"
 		" imageLink text,"
 		" seller_id integer,"
-		" inventory integer"
-		" discount float,"
+		" inventory integer,"
+		" discount float"
 		");";
-		
 	}
 	// returns true if successful
 	bool addItem(Item it)
@@ -211,9 +212,10 @@ public:
 	{
 		Item i;
 		i._id = _id;
-		db << "select * from items where _id = " << _id
+		db << "select seller_id,name,description,imageLink,category,price,inventory,discount from items where _id = ?"
+		   << _id
 		   >> [&](
-			long seller_id,
+			int seller_id,
 			string name,
 			string description,
 			string imageLink,
@@ -231,20 +233,175 @@ public:
 			};
 		return i;
 	}
-	void deleteItem(Item i) {
-		db<<"delete from items where _id=" << i._id;
+	bool deleteItem(long _id) 
+	{
+		try {
+			db<<"delete from items where _id=?" << _id;
+			return true;
+		} catch (exception &e){
+			return false;
+		}
+	}
+	bool deleteItem(Item i) {
+		return deleteItem(i._id);
 	}
 	// reduce inventory by 1 or remove from db if inventory=0
 	void itemSold(long itemID) {
 		Item i = getItem(itemID);
 		i.inventory--;
-		if (i.inventory == 0)
+		if (i.inventory == 0) {
 			deleteItem(i);
+		}
 		else {
 			db << "update items set inventory = ? where _id = ?" << i.inventory << itemID;
 		}
 	}
+
+	// Items put up by a particular user
+	vector<Item> userItems(long seller_id) 
+	{
+		vector<Item> V;
+		db << "select _id,name,description,imageLink,category,price,inventory,discount from items where seller_id=?"
+		 << seller_id
+		>> [&](	int _id, 
+			string name,
+			string description,
+			string imageLink,
+			string category,
+			int price,
+			int inventory,
+			float discount) {
+				Item i;
+				i._id = _id;
+				i.name = name;
+				i.description = description;
+				i.imageLink = imageLink;
+				i.category = category;
+				i.seller_id = seller_id;
+				i.price = price;
+				i.inventory = inventory;
+				V.push_back(i);
+			};
+		return V;	
+	}
 	
+	vector<Item> search(string query) 
+	{
+		vector<Item> V;
+		db << "select (_id,seller_id,name,description,imageLink,category,price,inventory,discount) from items where name like '%?%'" << query
+		>> [&](	long _id, 
+			long seller_id,
+			string name,
+			string description,
+			string imageLink,
+			string category,
+			int price,
+			int inventory,
+			float discount) {
+				Item i;
+				i._id = _id;
+				i.name = name;
+				i.description = description;
+				i.imageLink = imageLink;
+				i.category = category;
+				i.seller_id = seller_id;
+				i.price = price;
+				i.inventory = inventory;
+				V.push_back(i);
+			};
+		return V;
+	}
+
+	vector<Item> All()
+	{
+		vector<Item> V;
+		db << "select _id,seller_id,name,description,imageLink,category,price,inventory,discount from items" 
+		>> [&](	long _id, 
+			long seller_id,
+			string name,
+			string description,
+			string imageLink,
+			string category,
+			int price,
+			int inventory,
+			float discount) {
+				Item i;
+				i._id = _id;
+				i.name = name;
+				i.description = description;
+				i.imageLink = imageLink;
+				i.category = category;
+				i.seller_id = seller_id;
+				i.price = price;
+				i.inventory = inventory;
+				V.push_back(i);
+			};
+		return V;
+	}
+	
+};
+
+class Cart {
+private:
+	long user_id;
+public:
+	Cart(long userid)
+	{
+		user_id = userid;
+		db<<
+		"create table if not exists cart ("
+		"_id integer primary key autoincrement not null,"
+		"user_id integer not null,"
+		"product_id integer not null,"
+		"inventory integer not null"
+		");";
+	}
+	// returns true if successful
+	bool add(long product_id, int count)
+	{
+		try {
+			db <<"insert into cart (user_id,product_id,inventory) values(?,?,?);"
+			<< user_id
+			<< product_id
+			<< count;
+			return true;
+		} catch(exception &e) {
+			return false;
+		}
+	}
+
+	bool remove(long product_id) 
+	{
+		try {
+			db<<"delete from items where user_id=? and product_id=?" << user_id << product_id;
+			return true;
+		}
+		catch (exception &e) {
+			return false;
+		}
+	}
+	
+	bool updateCount(long product_id, int newCount) 
+	{
+		try {
+		db << "update items set inventory = ? where product_id = ? and user_id=?" 
+		   << newCount 
+		   << product_id
+		   << user_id;
+		   return true;
+		} catch(exception &e) {
+			return false;
+		}
+	}
+	vector<pii> getCart() 
+	{
+		vector<pii> V;	
+		db << "select product_id, inventory from cart where user_id=?"<<user_id
+		>>[&](long product_id, int inventory) {
+			V.push_back(make_pair(product_id, inventory));
+		};
+		return V;
+	}
 };
 
 #endif
