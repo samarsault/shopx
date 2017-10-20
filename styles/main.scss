@@ -1,7 +1,7 @@
 @import "sass/utilities/initial-variables";
 
-$primary: rgb(38, 46, 66);
-$secondary: $cyan;
+$info: rgb(38, 46, 66);
+$primary: $blue;
 
 @import 'bulma';
 @import 'buefy/buefy';
@@ -41,7 +41,7 @@ footer {
 	width: 250px;
 	background-size: cover;
 	background-position: center;
-	margin: 1em 0;
+	margin: 1em auto;
 }
 
 .shop-item {
@@ -62,12 +62,28 @@ footer {
 }
 
 .hero {margin: 0 4em;}
-.hero-home {
-	background-color: lighten($primary, 1%);
-	min-height: 400px;
+.hero-container {
+	background-size: contain;
+}
+#hero-1 {
 	color: #fff;
+	.hero-home {
+		clip-path: polygon(0 0, 65% 0, 39% 100%, 0% 100%);
+		background-color: rgba(40, 48, 69, 0.85);
+	}
+	background-image: url("/img/cover2.webp");
+}
+#hero-2 {
+	background-color: $warning;
+	padding: 0 !important;
+	min-height: 30rem;
+	color: #000;
+}
+.hero-home {
+	// background-color: lighten($primary, 1%);
 	.columns {
 		margin:0 $navExtra;
+		padding: 3em 0;
 	}
 	.heading {
 		font-weight: 100;
@@ -82,3 +98,9 @@ footer {
   .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
 	opacity: 0
   }
+  .light {
+	  color: #777;
+  }
+nav > .dropdown-item {
+	  padding-right: 0;
+}

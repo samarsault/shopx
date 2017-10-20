@@ -7,12 +7,13 @@
 	<title>ShopX | Where retailers meet shoppers</title>
 	
 	<script src="scripts/vue.js"></script>
+	<script src="scripts/vue-truncate.js"></script>
 	<script src="scripts/vue-router.js"></script>
 	<script src="scripts/buefy.min.js"></script>
 </head>
 <body>
 	<div id="app">
-		<nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+		<nav class="navbar is-info" role="navigation" aria-label="main navigation">
 			<div class="navbar-brand">
 				<a class="navbar-item" href="">
 					<img src="img/logo.png" width="120" >
@@ -30,6 +31,7 @@
 					<router-link v-if="loggedIn" class="navbar-item" to="/dashboard">Dashboard</router-link>
 					<a v-if="!loggedIn" class="navbar-item" @click="isLoginActive=true">Login</a>
 					<a v-if="loggedIn" class="navbar-item" @click="logout">Logout</a>
+				</div>
 			</div>
 		</nav>
 		
@@ -39,10 +41,12 @@
 		
 		<router-view></router-view>
 	</div>
+	
 	<footer>
 		<p>&copy; Shop<span style="color:rgb(21, 102, 192)">X</span> 2017</p>
 	</footer>
 	
+	<!-- templates -->
 	<script type="text/x-template" id="auth-templ">
 		<div>
 			<section class="login-win">
@@ -73,102 +77,156 @@
 	
 	<script type="text/x-template" id="dashboard-templ">
 		<transition name="fade">
-		<div class="container">
-			<!-- Add Item Modal -->
-			<b-modal :active.sync="addItemActive" ref="itemsModal">
-				<section class="login-win">
-					<b-field label="Name">
-						<b-input v-model="name"></b-input>
+			<div class="container">
+				<!-- Add Item Modal -->
+				<b-modal :active.sync="addItemActive" ref="itemsModal">
+					<section class="login-win">
+						<b-field label="Name">
+							<b-input v-model="name"></b-input>
+						</b-field>
+						
+						<b-field label="Description">
+							<b-input type="textarea"
+							minlength="100"
+							maxlength="1000"
+							v-model="desc"
+							placeholder="At least 100 characters about the item">
+						</b-input>
 					</b-field>
 					
-					<b-field label="Description">
+					<div class="columns">
+						<div class="column">
+							<b-field label="Price (Rs.)" >
+								<b-input v-model="price" type="number" placeholder="At least Rs. 100" min="100" />
+							</b-field>
+						</div>
+						<div class="column">
+							<b-field label="Inventory" >
+								<b-input v-model="inventory" type="number" min="1" />
+							</b-field>
+						</div>
+					</div>
+					
+					<div class="columns">
+						<div class="column">
+							<b-field label="Category">
+								<b-select placeholder="Select a Category" v-model="catValue" expanded>
+									<option
+									v-for="category in categories"
+									:value="category"
+									:key="category">
+									{{ category }}
+								</option>
+							</b-select>
+						</b-field>
+					</div>
+					<div class="column">
+						<b-field label="Image">
+							<form name="imgupload" method="POST" enctype="multipart/form-data">
+								<input name="file" type="file" accept="image/*">
+							</form>
+						</b-field>
+					</div>
+				</div>
+			</section>
+			<div class="panel" align="right">
+				<button class="is-link button"  @click="addItem">Add</button>
+				<button class="is-link button" @click="closeModal">Cancel</button>
+			</div>
+		</b-modal>
+		
+		<!-- <h1 class="title">Dashboard</h1> -->
+		
+		<!-- dashboard items -->
+		<b-tabs type="is-toggle" expanded>
+			<b-tab-item label="Cart" icon="shopping_cart">
+				<div align="right" style="margin:1em">
+					<button class="button field is-success" @click="checkout">
+						<b-icon icon="check_circle"></b-icon>
+						<span>Checkout</span>
+					</button>
+					<button class="button field is-danger" @click="cartCheck = true" v-if="!cartCheck">
+						<b-icon icon="delete"></b-icon>
+						<span>Remove Items</span>
+					</button>
+					<button class="button field is-danger" @click="removeCartItems" v-if="cartCheck">
+						<b-icon icon="delete"></b-icon>
+						<span>Done</span>
+					</button>
+				</div>
+				<b-table :data="cart" :checked-rows.sync="cartChecked" :checkable="cartCheck">
+					<template scope="props">
+						<b-table-column label="ID">{{ props.row._id }} </b-table-column>
+						<b-table-column label="Name">
+							<span style="padding: 1em">{{ props.row.name }}</span>
+							<img style="float:left"width="50" :src="props.row.imageLink">
+						</b-table-column>
+						<b-table-column label="Price">{{ props.row.price }}</b-table-column>
+						<b-table-column label="Count">{{ props.row.count }}</b-table-column>
+					</template>
+					<template slot="footer">
+						<div class="has-text-right">
+							<span>Rs. {{ cartTotal }}</span>
+						</div>
+					</template>
+				</b-table>
+			</b-tab-item>
+			<b-tab-item label="My Items" icon="business" @click="loadItems">
+				<div align="right" style="margin:1em">
+					<button class="button field is-warning" @click="addItemActive=true">
+						<b-icon icon="add"></b-icon>
+						<span>Add Item</span>
+					</button>
+					<button class="button field is-danger" @click="clearSelectedItems">
+						<b-icon icon="delete"></b-icon>
+						<span>Remove Selected</span>
+					</button>
+				</div>
+				<b-table :data="myItems" :selected.sync="selected" striped>
+					<template scope="props">
+						<b-table-column label="ID">{{ props.row._id }} </b-table-column>
+						<b-table-column label="Name">{{ props.row.name }}</b-table-column>
+						<b-table-column label="Price">{{ props.row.price }}</b-table-column>
+						<b-table-column label="Inventory">{{ props.row.inventory }}</b-table-column>
+					</template>
+				</b-table>
+			</b-tab-item>
+			
+			<b-tab-item label="Account" icon="account_circle">
+				<div align="right" style="margin:1em">	
+					<button class="button field is-success">
+						<b-icon icon="update"></b-icon>
+						<span>Update Info</span>
+					</button>
+					<button class="button field is-danger">
+						<b-icon icon="delete"></b-icon>
+						<span>Discard Changes</span>
+					</button>
+				</div>
+				<div class="container" style="margin:0 auto;width:45em">
+					<b-field label="Email">
+						<b-input type="email" />
+					</b-field>	
+					<b-field label="Name">
+						<b-input type="text"></b-input>
+					</b-field>
+					<b-field label="Address">
 						<b-input type="textarea"
 						minlength="100"
 						maxlength="1000"
 						v-model="desc"
-						placeholder="Maxlength automatically counts characters">
+						placeholder="Your Address">
 					</b-input>
 				</b-field>
-				<div class="columns">
-					<div class="column">
-						<b-field label="Price (Rs.)" >
-							<b-input v-model="price" type="number" placeholder="At least Rs. 100" min="100" />
-						</b-field>
-					</div>
-					<div class="column">
-						<b-field label="Inventory" >
-							<b-input v-model="inventory" type="number" min="1" />
-						</b-field>
-					</div>
-				</div>
-				<div class="columns">
-					<div class="column">
-						<b-field label="Category">
-							<b-select placeholder="Select a Category" v-model="catValue" expanded>
-								<option
-								v-for="category in categories"
-								:value="category"
-								:key="category">
-								{{ category }}
-							</option>
-						</b-select>
-					</b-field>
-				</div>
-				<div class="column">
-					<b-field label="Image">
-						<form name="imgupload" method="POST" enctype="multipart/form-data">
-							<input name="file" type="file" accept="image/*">
-						</form>
-					</b-field>
-				</div>
 			</div>
-		</section>
-		<div class="panel" align="right">
-			<button class="is-link button"  @click="addItem">Add</button>
-			<button class="is-link button" @click="closeModal">Cancel</button>
-		</div>
-	</b-modal>
-	
-	<h1 class="title">Dashboard</h1>
-	<b-tabs type="is-toggle" expanded>
-		<b-tab-item label="Cart" icon="shopping_cart">
-			<b-table :data="cart" :loading="loading">
-				<b-table-column field="vote_average" label="Vote Average" numeric sortable>
-				</b-table-column>
-			</b-table>
 		</b-tab-item>
-		<b-tab-item label="My Items" icon="business" @click="loadItems">
-			<div align="right" style="margin:1em">
-				<button class="button field is-warning" @click="addItemActive=true">
-					<b-icon icon="add"></b-icon>
-					<span>Add Item</span>
-				</button>
-				<button class="button field is-danger">
-					<b-icon icon="delete"></b-icon>
-					<span>Delete Items</span>
-				</button>
-			</div>
-			<b-table :data="myItems" striped>
-				<template scope="props">
-					<b-table-column label="ID">{{ props.row._id }} </b-table-column>
-					<b-table-column label="Name">{{ props.row.name }}</b-table-column>
-					<b-table-column label="Price">{{ props.row.price }}</b-table-column>
-					<b-table-column label="Inventory">{{ props.row.inventory }}</b-table-column>
-				</template>
-			</b-table>
-		</b-tab-item>
-		
-		<b-tab-item label="Account" icon="account_circle"></b-tab-item>
 	</b-tabs>
-</transition>
 </div>
+</transition>
 </script>
 
 <script type="text/x-template" id="shop-templ">
 	<section style="background-color:#f6f6f6;">
-		<b-modal id="itemModal" :active.sync="itVisible">
-			<item-info :item="items[selected]"></item-info>
-		</b-modal>
 		<section class="hero" style="">
 			<div class="hero-body columns is-multiline">
 				<div align="center" class="column is-one-third" v-for="(item,index) in items">
@@ -178,7 +236,7 @@
 						<p style="color: #262e42;font-weight: bold">Rs. {{ item.price }}</p>
 						<div class="columns is-gapless">
 							<div class="column">
-								<button class="button field is-warning">	
+								<button class="button field is-warning" :index="index" @click="addToCart">	
 									<b-icon icon="add"></b-icon>
 									<span>Cart</span>
 								</button>
@@ -198,21 +256,30 @@
 	
 	<script type="text/x-template" id="item-info-templ">
 		<transition name="fade">
-		<section class="hero">
-			<div class="hero-body">
-				<div class="columns is-gapless">
-					<div class="column is-one-quarter">
-						<div class="item-img"  v-bind:style='{ backgroundImage: "url(" + item.imageLink + ")", }'></div>
-					</div>
-					<div class="column">
-						
-						<h1 class="title">{{ item.name }}</h1>
-						<p>{{ item.description }}</p>
+			<section class="hero">
+				<div class="hero-body">
+					<div class="columns">
+						<div class="column is-one-quarter">
+							<div class="item-img"  v-bind:style='{ backgroundImage: "url(" + item.imageLink + ")", }'></div>
+							<p align="center" style="margin-bottom:1rem">
+								<span class="price subtitle" style="color: green">Rs. {{ item.price }} /-</span>
+							</p>
+							<button class="button field is-warning" style="width: 70%;margin: 0 auto;display: block" @click="plusCart">
+								<b-icon icon="shopping_cart"></b-icon>
+								<span>Add to Cart</span>
+							</button>
+						</div>
+						<div class="column">
+							<h1 class="title" style="margin-bottom:1rem;border-bottom: 1px solid #eee;padding-bottom: .75rem">{{ item.name }}</h1>
+							<div style="font-size: 1.15rem;font-weight: 300">
+								
+								<p>{{ item.description }}</p>
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
-		</section>
-	</transition>
+			</section>
+		</transition>
 	</script>
 	
 	<script type="text/x-template" id="item-search-templ">
@@ -225,11 +292,16 @@
 			field="title"
 			:loading="isFetching"
 			@input="getData"
-			@select="option => selected = option">
+			@select="onSelect">
 			
 			<template scope="props">
-					<img style="float:left"width="25" :src="props.option.imageLink">
-					<p style="margin-left:3em">{{ props.option.name }} </p>
+				<div class="columns" style="padding: 1rem 0;border-top: 1px solid #eee">
+					<div style="background-size:cover;background-repeat:no-repeat"class="column is-one-fifth" v-bind:style='{ backgroundImage: "url(" + props.option.imageLink + ")", }'></div>
+					<div class="column">
+						<strong>{{ props.option.name }} </strong>
+						<p class="light">{{ props.option.description | truncate(40) }}</p>
+					</div>
+				</div>
 			</template>
 		</b-autocomplete>
 	</div>
@@ -237,15 +309,38 @@
 
 <script type="text/x-template" id="home-page">
 	<div>
-		<section class="hero-home">
-			<div class="columns" >
-				<div class="column is-two-fifths" style="padding:3em ">
-					<h1 class="heading">Welcome to the intersection of shoppers and buyers alike.</h1>
+		<div class="hero-container" id="hero-1">
+			<section class="hero-home">
+				<div class="columns" >
+					<div class="column is-two-fifths" style="padding:3em ">
+						<h1 class="heading">Welcome to the intersection of shoppers and buyers alike.</h1>
+					</div>
 				</div>
-			</div>
-		</section>
-		<div style="padding:1em 5em">
-			<h1 class="title">Trending</h1>
+			</section>
+		</div>
+		<div class="hero-container" id="hero-2">
+			<section class="hero-home">
+				<div class="columns">
+					<div class="column is-two-fifths">
+						<img src="img/cover_demo.png" style="max-width:75%">
+					</div>
+					<div class="column" style="padding: 3rem ">
+						<h1 style="font-weight:300" class="heading" >
+							<span style="border-bottom: 1px dotted">Remixx Music Player</span><br>
+						</h1>
+						<h1 class="title" style="font-size:1.7em"> 
+							<span style="font-weight:100">A Shop<span style="color:rgb(21, 102, 192)">X</span> Exclusive</span>
+						</h1>
+						<div style="line-height:1.8;font-weight: 200;font-size:1.3em;margin-bottom:1em">
+							<p>With all new songs, better sound quality and much more.</p>
+						</div>
+						<router-link to="/shop" class="button field is-link" style="padding: 1.5rem 2rem">
+							<b-icon icon="shop"></b-icon>
+							<span>Shop Now</span>
+						</router-link>
+					</div>
+				</div>
+			</section>
 		</div>
 	</div>
 </script>
@@ -253,5 +348,6 @@
 <script src="scripts/fuse.min.js"></script>	
 <script src="scripts/axios.min.js"></script>
 <script src="scripts/app.js"></script>
+
 </body>
 </html>

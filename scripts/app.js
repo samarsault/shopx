@@ -3,6 +3,7 @@
 */ 
 
 Vue.use(Buefy.default);
+Vue.use(VueTruncate);
 
 //
 // Routes
@@ -12,7 +13,6 @@ var dashboard = {
 	data: function (){
 		return {
 			activeTab: 0,
-			cart: [],
 			loading: false,
 			addItemActive: false,
 			name: '',
@@ -21,12 +21,30 @@ var dashboard = {
 			catValue:'',
 			inventory:'',
 			categories: [ 'Electronics', 'Home' ],
-			myItems: []
+			myItems: [],
+			selected: { },
+			// cart
+			cart: [],
+			cartCheck: false,
+			cartChecked: []
+		}
+	},
+	computed: {
+		cartTotal: function() {
+			if (this.$parent.user == null || this.cart.length == 0)
+			return 0;
+			else {
+				var sum = 0; 
+				this.cart.forEach( (item) => sum += item.count * item.price );
+				return sum;
+			}
 		}
 	},
 	mounted: function() {
-		if (this.$parent.user != null)
-		this.loadItems();
+		if (this.$parent.user != null) {
+			this.loadItems();
+			this.loadCart();
+		}
 	},
 	methods: {
 		loadItems: function() {
@@ -40,6 +58,19 @@ var dashboard = {
 			}).then(function(resp) {
 				me.myItems = resp.data.items;
 			}).catch(console.error);
+		},
+		loadCart: function() {
+			var me = this;
+			var _id = this.$parent.user._id;
+			axios.post('/cgi-bin/cart', {
+				method: 'get',
+				user_id: _id,
+			}).then(function(resp) {
+				if (resp.data.success)
+				me.cart = resp.data.items;
+				else
+				me.$toast.open('Error fetching cart');
+			});
 		},
 		addItem: function() {
 			var form = document.forms.namedItem("imgupload");
@@ -68,6 +99,7 @@ var dashboard = {
 						}).then(function (resp){
 							if (resp.data.success) {
 								me.$toast.open('Item Added Successfully..')
+								me.closeModal();
 							} else {
 								me.$toast.open('Error adding item');
 							}
@@ -79,6 +111,7 @@ var dashboard = {
 						me.$toast.open('Error uploading image')
 					}
 				} else {
+					console.error("Error fetching request");
 				}
 			};
 			if (app.user == null) {
@@ -86,6 +119,63 @@ var dashboard = {
 				return;
 			}
 			xhr.send(oData);
+		},
+		clearSelectedItems: function() {
+			var me = this;
+			var sel_id = (this.selected)._id;
+			var msg = 'Delete ' + this.selected.name + ' from items?';
+			this.$dialog.confirm({
+				message: msg,
+				onConfirm: function() {
+					axios.post('/cgi-bin/items', {
+						method: 'remove',
+						item: {
+							_id: sel_id
+						}
+					}).then(function(resp){
+						if (resp.data.success) {
+							me.$toast.open('Deletion successful');
+							me.myItems = me.myItems.filter((item) => item._id !== sel_id);
+							me.closeModal();
+						} else {
+							me.$toast.open('Error deleting item');
+						}	
+					}).catch(console.error);
+				}
+			})
+		},
+		removeCartItems: function(e, curr) {
+			var me = this
+			if (typeof curr == "undefined") {
+				curr = 0;
+				this.cartCheck = false;
+			}
+
+			if (curr == this.cartChecked.length) {
+				this.$toast.open('Items deleted from cart.');
+				this.cart = this.cart.filter(function(item) {
+					for (var i = 0;i < me.cartChecked.length;i++)
+						if (me.cartChecked[i]._id == item._id)
+							return false;
+					return true;
+				});
+			}
+
+			var u_id = this.$parent.user._id;
+			axios.post('/cgi-bin/cart', {
+				method: 'remove',
+				user_id: u_id,
+				product_id: me.cartChecked[curr]._id
+			}).then(function(resp) {
+				if (resp.data.success) {
+					if (curr < me.cartChecked.length) {
+						me.removeCartItems(e, curr+1);
+					}
+				}
+			}).catch(console.error);;
+		},
+		checkout: function() {
+
 		},
 		closeModal: function() {
 			this.$refs.itemsModal.close();
@@ -98,9 +188,7 @@ var shop = {
 	data: function() {
 		return {
 			items: [],
-			loading: false,
-			itVisible: false,
-			selected: -1
+			loading: false
 		};
 	},
 	mounted: function() {
@@ -117,8 +205,29 @@ var shop = {
 				}
 			}).catch(console.error);
 		},
+		addToCart: function(e) {
+			var index = parseInt(e.currentTarget.getAttribute('index'));
+			var item = this.items[index];
+			var user = this.$parent.user;
+			var me = this;
+			if (user == null) {
+				this.$toast.open('Please sign in to use your cart');
+			}
+			axios.post('/cgi-bin/cart', {
+				method: 'add',
+				user_id: user._id,
+				product_id: item._id,
+				count: 1
+			}).then(function(resp){
+				if(resp.data.success) {	
+					me.$toast.open('Added ' + item.name + ' to cart');
+				} else {
+					me.$toast.open('Some error occurred');
+				}
+			}).catch(console.error);
+		},
 		moreInfo: function(e) {
-			this.selected = parseInt(e.currentTarget.getAttribute('id'));
+			this.selected = parseInt(e.currentTarget.getAttribute('item-id'));
 			this.itVisible = true;
 		}
 	}
@@ -142,10 +251,32 @@ var itemInfo = {
 			}
 		}).then(function(resp){
 			if (resp.data.success)
-			me.item = resp.data.item;
+				me.item = resp.data.item;
 			else
-			console.log('Error!');
+				console.log('Error!');
 		}).catch(console.error);
+	},
+	methods: {
+		plusCart: function() {
+			user = this.$parent.user;
+			item = this.item;
+			if( user == null) {
+				this.$toast.open('Please sign in to use your cart');
+				return;
+			}
+			axios.post('/cgi-bin/cart', {
+				method: 'add',
+				user_id: user._id,
+				product_id: item._id,
+				count: 1
+			}).then(function(resp){
+				if(resp.data.success) {	
+					me.$toast.open('Added ' + item.name + ' to cart');
+				} else {
+					me.$toast.open('Some error occurred');
+				}
+			}).catch(console.error);
+		}
 	}
 };
 
@@ -171,7 +302,6 @@ Vue.component('item-search', {
 			oData: [],
 			data: [],
 			name: '',
-			selected: null,
 			nameArr: [],
 			fuse: null
 		}
@@ -206,6 +336,9 @@ Vue.component('item-search', {
 			if (me.oData.length >= 0) {
 				this.data = this.fuse.search(this.name);
 			}
+		},
+		onSelect: function(op) {
+			this.$parent.$router.push('/items/' + op._id);
 		}
 	}
 });
@@ -222,7 +355,7 @@ Vue.component('auth', {
 	},
 	methods: {
 		login: function() {
-			var me = this;
+			var xApp = this.$parent.$parent, me = this;
 			if (this.$refs.emailField.isValid) {
 				axios.post('/cgi-bin/login/', {
 					register: this.register,
@@ -232,10 +365,12 @@ Vue.component('auth', {
 				})
 				.then(function (response) {
 					if (response.data.success) {
-						me.$parent.user = response.data.user;
-						me.$parent.loggedIn = true;
-						localStorage.setItem("user", JSON.stringify(me.$parent.user));
+						xApp.user = response.data.user;
+						xApp.loggedIn = true;
+						localStorage.setItem("user", JSON.stringify(xApp.user));
 						me.closeModal();
+					} else {
+						xApp.$toast.open('Invalid Email/Password');
 					}
 				})
 				.catch(function (error) {
