@@ -20,7 +20,7 @@ var dashboard = {
 			price: '',
 			catValue:'',
 			inventory:'',
-			categories: [ 'Electronics', 'Home' ],
+			categories: [ 'Electronics', 'Home', 'Travel', 'Grooming'],
 			myItems: [],
 			selected: { },
 			// cart
@@ -82,11 +82,7 @@ var dashboard = {
 				if (xhr.status == 200) {
 					// success
 					var data = JSON.parse(xhr.response);
-					if (data.success) {
-						// add item
-						axios.post('/cgi-bin/items', {
-							method: 'add',
-							item: {
+					var it = {
 								name: me.name,
 								seller_id: app.user._id,
 								category: me.catValue,
@@ -95,10 +91,16 @@ var dashboard = {
 								imageLink: data.url,
 								discount: 0, // TODO: Add Discount
 								inventory: parseInt(me.inventory)
-							}
+							};
+					if (data.success) {
+						// add item
+						axios.post('/cgi-bin/items', {
+							method: 'add',
+							item: it
 						}).then(function (resp){
 							if (resp.data.success) {
-								me.$toast.open('Item Added Successfully..')
+								me.$toast.open('Item Added Successfully..');
+								me.myItems.push(it);
 								me.closeModal();
 							} else {
 								me.$toast.open('Error adding item');
