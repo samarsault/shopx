@@ -20,7 +20,7 @@ var dashboard = {
 			price: '',
 			catValue:'',
 			inventory:'',
-			categories: [ 'Electronics', 'Home', 'Travel', 'Grooming'],
+			categories: [ 'Electronics', 'Home', 'Travel', 'Grooming', 'Watches'],
 			myItems: [],
 			selected: { },
 			// cart
@@ -100,6 +100,7 @@ var dashboard = {
 						}).then(function (resp){
 							if (resp.data.success) {
 								me.$toast.open('Item Added Successfully..');
+								it['_id'] = resp.data._id;
 								me.myItems.push(it);
 								me.closeModal();
 							} else {
@@ -178,6 +179,13 @@ var dashboard = {
 		},
 		checkout: function() {
 
+		},
+		itemsModalClose: function() {
+			this.name = '';
+			this.desc = '';
+			this.price = ''
+			this.catValue = '';
+			this.inventory = '';
 		},
 		closeModal: function() {
 			this.$refs.itemsModal.close();

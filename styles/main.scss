@@ -39,7 +39,8 @@ footer {
 .item-img {
 	height: 250px;
 	width: 250px;
-	background-size: cover;
+	background-size: contain;
+	background-repeat: no-repeat;
 	background-position: center;
 	margin: 1em auto;
 }

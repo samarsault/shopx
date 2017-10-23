@@ -51,8 +51,12 @@ int main(int argc, char **argv)
 				i.discount = disc;
 				i.inventory = inv;
 				
-				if(items.addItem(i))
-				resp["success"] = true;
+				if(items.addItem(i)) {
+					long id;
+					resp["success"] = true;
+					db << "select _id from items where seller_id = ? and imageLink = ? " << s_id << imL >> id;
+					resp["_id"] = id;
+				}
 				
 			} else if (method == "remove") {
 				long _id = it["_id"];

@@ -79,7 +79,7 @@
 		<transition name="fade">
 			<div class="container">
 				<!-- Add Item Modal -->
-				<b-modal :active.sync="addItemActive" ref="itemsModal">
+				<b-modal :active.sync="addItemActive" ref="itemsModal" @close="itemsModalClose">
 					<section class="login-win">
 						<b-field label="Name">
 							<b-input v-model="name"></b-input>
