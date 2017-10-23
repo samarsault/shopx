@@ -15,7 +15,7 @@ using namespace sqlite;
 typedef pair<int, int> pii;
 
 // database object
-database db("shopx.db");
+database db("../shopx.db");
 
 enum USER_TYPE {
 	BUYER,
