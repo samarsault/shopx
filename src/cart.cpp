@@ -23,7 +23,7 @@ using json = nlohmann::json;
 
 int main(int argc, char **argv)
 {
-	cout << HTTPContentHeader("application/json") ; 
+	cout << HTTPContentHeader("application/json") ;
 	json resp;
 	resp["success"] = false;
 	try 
