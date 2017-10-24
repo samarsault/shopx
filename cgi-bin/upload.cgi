@@ -27,7 +27,6 @@ def save_uploaded_file():
 		return resp
 
 	uploaded_file_path = os.path.join(UPLOAD_DIR, str(uuid.uuid4()) + os.path.splitext(form_file.filename)[1])
-
 	with file(uploaded_file_path, 'wb') as fout:
 		while True:
 			chunk = form_file.file.read(100000)
