@@ -348,7 +348,8 @@ Vue.component('item-search', {
 			}
 		},
 		onSelect: function(op) {
-			this.$parent.$router.push('/items/' + op._id);
+			if (op != null)
+				this.$parent.$router.push('/items/' + op._id);
 		}
 	}
 });
