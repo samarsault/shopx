@@ -1,4 +1,4 @@
-cc = clang++-3.8 -std=c++1y -lcgicc -lsqlite3 # on osx use clang++
+cc = clang++ -std=c++1y -lcgicc -lsqlite3 # on osx use clang++
 css:
 	scss styles/main.scss styles/main.css --sourcemap=none
 cpp:

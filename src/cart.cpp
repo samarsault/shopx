@@ -56,10 +56,8 @@ int main(int argc, char **argv)
 			} 
 			else if (method == "get") {
 				vector<pair<Item, int> > V = cart.getCart();
-				if (V.empty()) 
-					return 1;
-
 				json itemArr;
+
 				for (int j = 0;j < V.size();j++) {
 					Item i = V[j].first;
 					itemArr.push_back({

@@ -59,11 +59,11 @@
 				</b-field>
 				<p v-if="!register" align="right">New User? <a href="#" @click="register=true">Sign Up.</a></p>
 				<div v-if="register">
-					<b-field label="I came to">
-						<b-select placeholder="Shop/Sell" v-model="typeOption">
-							<option value="1">Shop</option>
-							<option value="2">Sell</option>
-						</b-select>
+					<b-field label="Name">
+						<b-input  v-model="user_name"></b-input>
+					</b-field>
+					<b-field label="Address">
+						<b-input maxlength="200" type="textarea" v-model="user_address"></b-input>
 					</b-field>
 				</div>
 			</section>
@@ -134,7 +134,22 @@
 				<button class="is-link button" @click="closeModal">Cancel</button>
 			</div>
 		</b-modal>
-		
+
+		<b-modal :active.sync="ordersModalActive" ref="ordersModal" >
+			<b-table :data="myOrders">
+				<template scope="props">
+					<b-table-column label="ID">{{ props.row._id }} </b-table-column>
+					<b-table-column label="Count">{{ props.row.count }}</b-table-column>
+					<b-table-column label="Name">{{ props.row.user.name }}</b-table-column>
+					<b-table-column label="Email">{{ props.row.user.email }}</b-table-column>
+					<b-table-column label="Address">{{ props.row.user.address }}</b-table-column>
+					<b-table-column label="Completed"> 
+						<a href="#" :m-id="props.row._id" @click="orderComplete">Mark</a>
+					</b-table-column>
+				</template>
+			</b-table>
+		</b-modal>
+
 		<!-- <h1 class="title">Dashboard</h1> -->
 		
 		<!-- dashboard items -->
@@ -188,6 +203,9 @@
 						<b-table-column label="Name">{{ props.row.name }}</b-table-column>
 						<b-table-column label="Price">{{ props.row.price }}</b-table-column>
 						<b-table-column label="Inventory">{{ props.row.inventory }}</b-table-column>
+						<b-table-column label="Orders">
+							<a href="#" @click="viewOrders" :item_id="props.row._id">View</a>
+						</b-table-column>
 					</template>
 				</b-table>
 			</b-tab-item>

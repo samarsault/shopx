@@ -26,13 +26,16 @@ var dashboard = {
 			// cart
 			cart: [],
 			cartCheck: false,
-			cartChecked: []
+			cartChecked: [],
+			myOrders: [],
+			ordersModalActive: false
 		}
 	},
 	computed: {
 		cartTotal: function() {
+			if (this.cart==null)this.cart=[];
 			if (this.$parent.user == null || this.cart.length == 0)
-			return 0;
+				return 0;
 			else {
 				var sum = 0; 
 				this.cart.forEach( (item) => sum += item.count * item.price );
@@ -40,7 +43,7 @@ var dashboard = {
 			}
 		}
 	},
-	mounted: function() {
+	mounted: function()  {
 		if (this.$parent.user != null) {
 			this.loadItems();
 			this.loadCart();
@@ -67,9 +70,9 @@ var dashboard = {
 				user_id: _id,
 			}).then(function(resp) {
 				if (resp.data.success)
-				me.cart = resp.data.items;
+					me.cart = resp.data.items;
 				else
-				me.$toast.open('Error fetching cart');
+					me.$toast.open('Error fetching cart');
 			});
 		},
 		addItem: function() {
@@ -178,7 +181,23 @@ var dashboard = {
 			}).catch(console.error);;
 		},
 		checkout: function() {
-
+			var user = this.$parent.user;
+			var me = this;
+			this.$dialog.confirm({
+				message: 'Do you want to place this order?',
+				onConfirm: function() {
+					axios.post('/cgi-bin/order', {
+						method: 'place',
+						user_id: user._id
+					}).then(function(resp) {
+						if (resp.data.success) {
+							me.cart = [];
+						} else {
+							me.$toast.open('Error');
+						}
+					})
+				}
+			});
 		},
 		itemsModalClose: function() {
 			this.name = '';
@@ -189,6 +208,38 @@ var dashboard = {
 		},
 		closeModal: function() {
 			this.$refs.itemsModal.close();
+		},
+		viewOrders: function (e) {
+			var me = this;
+			var prod_id = (e.currentTarget.getAttribute('item_id'));
+			axios.post('/cgi-bin/order', {
+				method: 'getprod',
+				product_id: parseInt(prod_id)
+			}).then(function(resp) {
+				if(resp.data.success) {
+					if (resp.data.orders == null) {
+						me.$toast.open('No Pending orders yet!');
+					} else {
+						me.myOrders = resp.data.orders;
+						me.ordersModalActive = true;
+					}
+				}
+			});
+		
+		},
+		orderComplete: function(e) {
+			var order_id = (e.currentTarget.getAttribute('m-id'));
+			var me = this;
+			axios.post('/cgi-bin/order', {
+				method: 'finish',
+				_id: parseInt(order_id)
+			}).then(function(r) {
+				if (r.data.success) {
+					me.myOrders = me.myOrders.filter(function(x) {
+						return x._id != order_id;
+					});
+				}
+			});
 		}
 	}
 };
@@ -361,7 +412,8 @@ Vue.component('auth', {
 			register: false,
 			email: '',
 			pass: '',
-			typeOption: 0
+			user_name: '',
+			user_address: ''
 		}
 	},
 	methods: {
@@ -369,10 +421,11 @@ Vue.component('auth', {
 			var xApp = this.$parent.$parent, me = this;
 			if (this.$refs.emailField.isValid) {
 				axios.post('/cgi-bin/login/', {
-					register: this.register,
-					email: this.email,
-					pass: this.pass,
-					type: this.typeOption - 1
+					register: me.register,
+					email: me.email,
+					pass: me.pass,
+					name: me.user_name,
+					address: me.user_address
 				})
 				.then(function (response) {
 					if (response.data.success) {

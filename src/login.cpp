@@ -5,7 +5,6 @@
 *		email: Email ID ( string )
 *		pass : password ( string )
 *		register: Whether to register (bool)
-*       type : (int) if Register = true
 *
 * Response Params:
 *	success: (bool)
@@ -40,8 +39,10 @@ int main(int argc, char **argv)
 		auto emailPtr = j.find("email");
 		auto passPtr = j.find("pass");
 		
-		if (emailPtr== j.end() || passPtr == j.end() || reg == j.end())
+		if (emailPtr== j.end() || passPtr == j.end() || reg == j.end()) {
+			throw "Invalid JSON Data";
 			return 1;
+		}
 		
 		string email = *emailPtr, pass =*passPtr;
 		// whether its a registration request
@@ -54,25 +55,20 @@ int main(int argc, char **argv)
 				User u = users.getUser(email);
 				resp["user"] = {
 					{ "email", u.email },
-					{ "type", u.type },
 					{ "_id", u._id },
+					{ "name", u.name },
 					{ "address", u.address }
 				};
 			}
 		} else {
-			auto type = j.find("type");
-			if (type != j.end()) {
-				int t = j["type"];
-				if(users.createUser(email, pass, t)) {
-					resp["success"] = true;
-					User u = users.getUser(email);
-					resp["user"] = {
-						{ "email", u.email },
-						{ "type", u.type },
-						{ "_id", u._id },
-						{ "address", u.address }
-					};
-				}
+			if(users.createUser(email, pass, j["name"], j["address"])) {
+				resp["success"] = true;
+				User u = users.getUser(email);
+				resp["user"] = {
+					{ "email", u.email },
+					{ "_id", u._id },
+					{ "address", u.address }
+				};
 			}
 		}
 	}

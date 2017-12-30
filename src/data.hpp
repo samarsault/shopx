@@ -15,7 +15,7 @@ using namespace sqlite;
 typedef pair<int, int> pii;
 
 // database object
-database db("../shopx.db");
+database db("./shopx.db");
 
 enum USER_TYPE {
 	BUYER,
@@ -24,14 +24,15 @@ enum USER_TYPE {
 
 struct User {
 	long _id;
-	string email, passwd, address;
-	int type;	
+	string email, passwd, address, name;
 };
 
 struct Order {
 	long _id;
 	long user_id;
 	long product_id;
+	int count;
+	int complete;
 };
 
 struct Item {
@@ -55,22 +56,21 @@ public:
 		"_id integer primary key autoincrement not null,"
 		" email text unique not null,"
 		" password text not null,"
-		" address text,"
-		" type integer not null"
+		" address text"
 		");";
 	}
 	//
 	// create a user
 	//
-	bool createUser(string email, string password, int type, string address="")
+	bool createUser(string email, string password, string name, string address)
 	{
 		int cnt = 0;
 		db << "select count(*) from users where email=?" << email >> cnt;
 		if (cnt == 0) {
-			db<< "insert into users (email,password,type,address) values(?,?,?,?); "
+			db<< "insert into users (email,password,name,address) values(?,?,?,?); "
 			<<email
 			<<password
-			<<type
+			<< name
 			<<address; 	
 			return true;
 		}
@@ -88,12 +88,12 @@ public:
 		// TODO
 		User u;
 		u._id = ID;
-		db<<"select email,password,address,type from users where _id=?"<<ID 
-		>>[&](string email, string passwd, string addr, int type) {
+		db<<"select email,password,address,name from users where _id=?"<<ID 
+		>>[&](string email, string passwd, string addr, string name) {
 			u.email = email;
 			u.passwd = passwd;
 			u.address = addr;
-			u.type = type;
+			u.name = name;
 		};
 		return u;
 	}
@@ -104,73 +104,17 @@ public:
 		// TODO
 		User u;
 		u.email = email;
-		db<<"select _id,password,address,type from users where email=?"<<email 
-		>>[&](long id, string passwd, string addr, int type) {
+		db<<"select _id,password,address,name from users where email=?"<<email 
+		>>[&](long id, string passwd, string addr,string name) {
 			u._id = id;
 			u.passwd = passwd;
 			u.address = addr;
-			u.type = type;
+			u.name =name;
 		};
 		return u;
 	}
 };
 
-class OrderDB {
-public:
-	// all functions
-	OrderDB()
-	{
-		db<<
-		" create table if not exists orders ("
-		" _id integer primary key autoincrement not null"
-		" user_id integer not null,"
-		" product_id integer not null"
-		");";
-	}
-	// returns true if successful
-	bool placeOrder(long userID, long productID) 
-	{
-		try {
-			db<<"insert into orders (user_id,product_id) values(?,?);"
-			<<userID
-			<<productID;
-			return true;      
-		} catch (exception &e) {
-			return false;
-		}
-	}
-	Order getOrder(long orderID) {
-		Order o;
-		db << "select user_id, product_id from orders where _id=?" << orderID 
-		>> [&](long user_id, long product_id) {
-			o.user_id = user_id;
-			o.product_id = product_id;
-		};
-		return o;
-	}
-	// get all orders placed by a particular user
-	// returns : array of orders
-	vector<Order> getAllOrders(long userID) {
-		vector<Order> O;
-		db << "select _id, product_id from orders where user_id=?" << userID 
-		>> [&](long _id, long product_id) {
-			Order ord = { _id, userID, product_id };
-			O.push_back(ord);
-		};
-		return O;	
-	}
-	// get all orders of a product
-	// returns array of orders
-	vector<Order> getProductOrders(long productID) {
-		vector<Order> O;
-		db << "select _id, user_id from orders where product_id=?" << productID 
-		>> [&](long _id, long userID) {
-			Order ord = { _id, userID, productID };
-			O.push_back(ord);
-		};
-		return O;
-	}
-};
 
 class ItemsDB {
 public:
@@ -414,4 +358,96 @@ public:
 	}
 };
 
+class OrderDB {
+public:
+	// all functions
+	OrderDB()
+	{
+		db<<
+		" create table if not exists orders ("
+		" _id integer primary key autoincrement not null,"
+		" user_id integer not null,"
+		" product_id integer not null,"
+		" count integer default 1,"
+		" complete integer default 0"
+		");";
+	}
+	// returns true if successful
+	bool placeOrder(long userID) 
+	{
+		Cart c(userID);
+		vector<pair<Item, int> > V = c.getCart();
+		try {
+			for (int i = 0;i < V.size();i++)
+			{
+				Item it = V[i].first;
+				int cnt = V[i].second;
+				db<<"insert into orders (user_id,product_id,count) values(?,?,?);"
+				  << userID
+				  << it._id
+				  << cnt;
+				  c.remove(it._id);
+			}
+			return true;     
+		} catch (exception &e) {
+			cout << e.what() << endl;
+			return false;
+		}
+	}
+	Order getOrder(long orderID) {
+		Order o;
+		db << "select user_id, product_id from orders where _id=?" << orderID 
+		>> [&](long user_id, long product_id, int cnt, int cmp) {
+			o.user_id = user_id;
+			o.product_id = product_id;
+			o.count = cnt;
+			o.complete = cmp;
+			o._id = orderID;
+		};
+		return o;
+	}
+	// get all orders placed by a particular user
+	// returns : array of orders
+	vector<Order> getAllOrders(long userID) {
+		vector<Order> O;
+		db << "select _id, product_id from orders where user_id=?" << userID 
+		>> [&](long _id, long product_id, int cnt, int cmp) {
+			Order ord = { _id, userID, product_id, cnt, cmp };
+			O.push_back(ord);
+		};
+		return O;	
+	}
+	// get all orders of a product
+	// returns array of orders
+	vector<Order> getProductOrders(long productID) {
+		vector<Order> O;
+		db << "select _id, user_id from orders where complete = 0 and product_id=?" << productID 
+		>> [&](long _id, long user_id, long product_id, int cnt, int cmp) {
+			Order ord = { _id, user_id, product_id, cnt, cmp };
+			O.push_back(ord);
+		};
+		return O;
+	}
+
+
+	bool cancelOrder(long id) 
+	{
+		try {
+			db << "delete from orders where _id = ?" << id;
+			return true;
+		} catch(exception &e) {
+			return false;
+		}
+	}
+
+	bool finishOrder(long orderID)
+	{
+		try {
+			db << "update orders set complete = 1 where _id = ?" << orderID;
+			return true;
+		} catch (exception &e) {
+			return false;
+		}
+	}
+};
 #endif
