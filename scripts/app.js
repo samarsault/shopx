@@ -49,7 +49,7 @@ var dashboard = {
 	methods: {
 		loadItems: function() {
 			var me = this;
-			console.log('Loading items..');
+//console.log('Loading items..');
 			axios.post('/cgi-bin/items', {
 				method: 'get',
 				item: {
