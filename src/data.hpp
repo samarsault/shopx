@@ -17,11 +17,6 @@ typedef pair<int, int> pii;
 // database object
 database db("./shopx.db");
 
-enum USER_TYPE {
-	BUYER,
-	SELLER
-};
-
 struct User {
 	long _id;
 	string email, passwd, address, name;
