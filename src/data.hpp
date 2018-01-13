@@ -1,5 +1,5 @@
 /*
-* Databae Manager
+* Database Manager
 */
 #ifndef DATA_MANAGER
 
@@ -405,9 +405,14 @@ public:
 	// returns : array of orders
 	vector<Order> getAllOrders(long userID) {
 		vector<Order> O;
-		db << "select _id, product_id from orders where user_id=?" << userID 
+		db << "select _id, product_id,count,complete from orders where user_id=?" << userID 
 		>> [&](long _id, long product_id, int cnt, int cmp) {
-			Order ord = { _id, userID, product_id, cnt, cmp };
+			Order ord;
+			ord._id = _id;
+			ord.user_id = userID;
+			ord.product_id = product_id;
+			ord.count = cnt;
+			ord.complete = cmp;
 			O.push_back(ord);
 		};
 		return O;	
@@ -416,9 +421,14 @@ public:
 	// returns array of orders
 	vector<Order> getProductOrders(long productID) {
 		vector<Order> O;
-		db << "select _id, user_id from orders where complete = 0 and product_id=?" << productID 
-		>> [&](long _id, long user_id, long product_id, int cnt, int cmp) {
-			Order ord = { _id, user_id, product_id, cnt, cmp };
+		db << "select _id, user_id,user_id,count,complete from orders where complete = 0 and product_id=?" << productID 
+		>> [&](long _id, long user_id, int cnt, int cmp) {
+			Order ord;
+			ord._id = _id;
+			ord.user_id = user_id;
+			ord.product_id = productID;
+			ord.count = cnt;
+			ord.complete = cmp;
 			O.push_back(ord);
 		};
 		return O;
@@ -445,4 +455,5 @@ public:
 		}
 	}
 };
+
 #endif

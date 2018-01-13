@@ -210,34 +210,6 @@
 				</b-table>
 			</b-tab-item>
 			
-			<b-tab-item label="Account" icon="account_circle">
-				<div align="right" style="margin:1em">	
-					<button class="button field is-success">
-						<b-icon icon="update"></b-icon>
-						<span>Update Info</span>
-					</button>
-					<button class="button field is-danger">
-						<b-icon icon="delete"></b-icon>
-						<span>Discard Changes</span>
-					</button>
-				</div>
-				<div class="container" style="margin:0 auto;width:45em">
-					<b-field label="Email">
-						<b-input type="email" />
-					</b-field>	
-					<b-field label="Name">
-						<b-input type="text"></b-input>
-					</b-field>
-					<b-field label="Address">
-						<b-input type="textarea"
-						minlength="100"
-						maxlength="1000"
-						v-model="desc"
-						placeholder="Your Address">
-					</b-input>
-				</b-field>
-			</div>
-		</b-tab-item>
 	</b-tabs>
 </div>
 </transition>
