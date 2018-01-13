@@ -1,4 +1,8 @@
 node_modules
+cgi-bin/cart
+cgi-bin/items
+cgi-bin/login
+cgi-bin/order
 package-lock.json
 .sass-cache
 .DS_Store

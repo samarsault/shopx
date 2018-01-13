@@ -432,6 +432,8 @@ Vue.component('auth', {
 						xApp.user = response.data.user;
 						xApp.loggedIn = true;
 						localStorage.setItem("user", JSON.stringify(xApp.user));
+						if (me.register)
+							xApp.$toast.open('Registration successful');
 						me.closeModal();
 					} else {
 						xApp.$toast.open('Invalid Email/Password');
