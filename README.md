@@ -1,6 +1,8 @@
 # ShopX
 
-A shopping site prototype
+An experimental shopping site prototype using a CGI Interface
+
+![ShopX](http://i.imgur.com/SDiUGu2r.jpg)
 
 ## Database
 
