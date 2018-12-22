@@ -4,6 +4,16 @@ An experimental shopping site prototype using a CGI Interface
 
 ![ShopX](http://i.imgur.com/SDiUGu2r.jpg)
 
+## Running
+
+Once, you've installed the libraries in the C++ Dependencies section,
+
+```sh
+$ make cpp # compile C++
+$ make css # compile sass
+$ make serve
+```
+
 ## Database
 
 SQLite is used as a database engine.
